@@ -2,6 +2,7 @@ import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { asyncHandler } from "../utils/asyncHandler.js";
+//import { useTransition } from "react";
 
 export const register = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
@@ -44,5 +45,16 @@ export const login = asyncHandler(async (req, res) => {
     { expiresIn: "7d" }
   );
 
-  res.json({ token });
+  //res.json({ token });
+
+  res.status(200).json({
+    success: true,
+    message : "Login successful",
+    token,
+    user:{
+      id: user._id,
+      name : user.name,
+      email : user.email
+    }
+  })
 });
