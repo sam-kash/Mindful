@@ -8,3 +8,10 @@ export const calculatePriority = ({title, content}) => {
     if (text.includes("meeting")) score +=10
 
 }
+
+export const adjustByMode = (baseScore, mode) => {
+  if (mode === "busy") return baseScore + 30;
+  if (mode === "focus") return baseScore + 15;
+  if (mode === "relaxed") return baseScore - 10;
+  return baseScore;
+};
