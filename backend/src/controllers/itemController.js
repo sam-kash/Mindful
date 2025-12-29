@@ -1,8 +1,11 @@
 import Item from "../models/Item.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
+import { calculatePriority } from "../services/priorityService.js"
 
 export const createItem = asyncHandler(async (req, res) => {
     const {title, content, catagory} = req.body;
+
+    const priorityScore = calculatePriority({title, content})
 
     const item = await Item.create({
         user: req.user.id,
