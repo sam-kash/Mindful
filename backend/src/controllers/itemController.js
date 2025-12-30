@@ -37,8 +37,31 @@ export const createItem = asyncHandler(async (req, res) => {
 });
 
 export const getItems = asyncHandler(async (req, res) => {
-  const items = await Item.find({ user: req.user.id })
-    .sort({ priorityScore: -1 });
+  const page = Math.max(parseInt(req.query.page) || 1, 1);
+  const limit = Math.min(parseInt(req.query.limit) || 20, 100);
+  const skip = (page - 1) * limit;
 
-  res.json(items);
+  const { source, category, minPriority } = req.query;
+
+  const filter = { user: req.user.id };
+
+  if (source) filter.source = source;
+  if (category) filter.category = category;
+  if (minPriority) filter.priorityScore = { $gte: Number(minPriority) };
+
+  const [items, total] = await Promise.all([
+    Item.find(filter)
+      .sort({ priorityScore: -1, createdAt: -1 })
+      .skip(skip)
+      .limit(limit),
+    Item.countDocuments(filter)
+  ]);
+
+  res.json({
+    page,
+    limit,
+    total,
+    pages: Math.ceil(total / limit),
+    items
+  });
 });
