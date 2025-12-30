@@ -14,6 +14,14 @@ const itemSchema = new mongoose.Schema(
       type: String,
       enum: ["email", "task", "notification"],
       default: "task"
+    },
+    source : {
+      type : String,
+      enum : ["manual", "gmail", "outlook"],
+      default: "manual"
+    },
+    externalId: {
+      type: String
     }
   },
   { timestamps: true }
