@@ -11,6 +11,19 @@ export const ingestItem = asyncHandler(async (req, res) => {
   let score = calculatePriority({ title, content });
   score = adjustByMode(score, user.mode);
 
+  const exists = await Item.findOne({
+    user : req.user.id,
+    source,
+    externalId
+  });
+
+  if(exists){
+    return res.status(200).json({
+        message : "Item already Ingested",
+        item: exists
+    });
+  }
+
   const item = await Item.create({
     user: req.user.id,
     title,

@@ -27,4 +27,6 @@ const itemSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+itemSchema.index({user:1, source : 1, externalId : 1} , {unique: true})
+
 export default mongoose.model("Item", itemSchema);
