@@ -30,6 +30,13 @@ const itemSchema = new mongoose.Schema(
     isDeleted: {
       type : Boolean,
       default : false
+    },
+    isRead : {
+      type : Boolean,
+      default : false,
+    },
+    readAt : {
+      type : Date
     }
   },
   { timestamps: true }

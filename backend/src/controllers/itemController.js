@@ -51,7 +51,7 @@ export const getItems = asyncHandler(async (req, res) => {
 
   const [items, total] = await Promise.all([
     Item.find(filter)
-      .sort({ priorityScore: -1, createdAt: -1 })
+      .sort({ isRead :1, priorityScore: -1, createdAt: -1 })
       .skip(skip)
       .limit(limit),
     Item.countDocuments(filter)
