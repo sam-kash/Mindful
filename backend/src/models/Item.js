@@ -22,6 +22,14 @@ const itemSchema = new mongoose.Schema(
     },
     externalId: {
       type: String
+    },
+    isArchived : {
+      type: Boolean,
+      default : false
+    },
+    isDeleted: {
+      type : Boolean,
+      default : false
     }
   },
   { timestamps: true }

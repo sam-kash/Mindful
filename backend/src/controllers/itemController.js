@@ -43,7 +43,7 @@ export const getItems = asyncHandler(async (req, res) => {
 
   const { source, category, minPriority } = req.query;
 
-  const filter = { user: req.user.id };
+  const filter = { user: req.user.id, isDeleted : false, isArchived : false };
 
   if (source) filter.source = source;
   if (category) filter.category = category;
