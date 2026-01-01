@@ -3,6 +3,8 @@ import User from "../models/User.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { calculatePriority, adjustByMode } from "../services/priorityService.js";
 import { logActivity } from "../utils/activityLogger.js";
+import { ingestQueue } from "../queues/ingestQueue.js";
+
 
 export const ingestItem = asyncHandler(async (req, res) => {
   const { title, content, category, source, externalId } = req.body;
@@ -54,32 +56,13 @@ export const ingestBatch = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "No items provided" });
   }
 
-  const user = await User.findById(req.user.id);
-
-  // Build docs with scoring
-  const docs = items.map((it) => {
-    const base = calculatePriority({
-      title: it.title,
-      content: it.content
-    });
-    let score = adjustByMode(base, user.mode);
-    score = Number.isFinite(score) ? Math.min(score, 100) : 0;
-
-    return {
-      user: req.user.id,
-      title: it.title,
-      content: it.content,
-      category: it.category || "email",
-      source: it.source || "gmail",
-      externalId: it.externalId,
-      priorityScore: score
-    };
+  await ingestQueue.add("batch-ingest", {
+    userId: req.user.id,
+    items
   });
 
-  // Insert unordered to skip duplicates (unique index handles it)
-  const result = await Item.insertMany(docs, { ordered: false });
-
-  res.status(201).json({
-    inserted: result.length
+  res.status(202).json({
+    message: "Batch ingestion queued",
+    count: items.length
   });
 });
