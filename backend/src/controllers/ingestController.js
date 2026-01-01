@@ -2,6 +2,7 @@ import Item from "../models/Item.js";
 import User from "../models/User.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { calculatePriority, adjustByMode } from "../services/priorityService.js";
+import { logActivity } from "../utils/activityLogger.js";
 
 export const ingestItem = asyncHandler(async (req, res) => {
   const { title, content, category, source, externalId } = req.body;
@@ -33,6 +34,14 @@ export const ingestItem = asyncHandler(async (req, res) => {
     externalId,
     priorityScore: Math.min(score, 100)
   });
+
+  await logActivity({
+  user: req.user.id,
+  item: item._id,
+  action: "ingested",
+  meta: { source, externalId }
+});
+
 
   res.status(201).json(item);
 });

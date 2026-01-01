@@ -5,6 +5,7 @@ import {
   calculatePriority,
   adjustByMode
 } from "../services/priorityService.js";
+import { logActivity } from "../utils/activityLogger.js";
 
 export const createItem = asyncHandler(async (req, res) => {
   const {
@@ -14,6 +15,13 @@ export const createItem = asyncHandler(async (req, res) => {
     source = "manual",
     externalId
   } = req.body;
+
+    await logActivity({
+    user: req.user.id,
+    item: item._id,
+    action: "created",
+    meta: { source }
+  });
 
   // get user & mode
   const user = await User.findById(req.user.id);

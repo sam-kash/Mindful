@@ -5,7 +5,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 
 const router = express.Router();
 
-/* ✅ existing route — KEEP */
+
 router.get("/me", protect, (req, res) => {
   res.json({
     message: "Protected route working",
@@ -13,7 +13,6 @@ router.get("/me", protect, (req, res) => {
   });
 });
 
-/* 🔥 NEW route — ADD THIS */
 router.put(
   "/mode",
   protect,
