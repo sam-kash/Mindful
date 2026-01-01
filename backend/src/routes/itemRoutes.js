@@ -16,6 +16,8 @@ router.get("/:id/explain" , protect, explainItem)
 router.patch("/:id/archive", protect, archiveItem);
 router.patch("/:id/restore", protect, restoreItem);
 router.patch("/:id/delete", protect, deleteItem);
+
+//Read and unread
 router.patch("/:id/read", protect, markRead);
 router.patch("/:id/unread", protect, markUnread);
 
