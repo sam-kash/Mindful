@@ -7,6 +7,7 @@ import ingestRoutes from "./routes/ingestRoutes.js"
 //import Activity from "./models/Activity.js";
 import activityRoutes from "./routes/activityRoutes.js";
 import oauthRoutes from "./routes/oauthRoutes.js";
+import gmailRoutes from "./routes/gmailRoutes.js"
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use("/api/items", itemRoutes)
 app.use("/api/ingest" , ingestRoutes);
 app.use("/api/activity" , activityRoutes);
 app.use("/api/oauth", oauthRoutes);
+app.use("/api/gmail" , gmailRoutes);
 
 
 // Adding a health route to test backend for development purpose

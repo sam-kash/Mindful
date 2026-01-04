@@ -2,5 +2,5 @@ Building a B2B email Priority System
 
 Will properly document this readme later
 
-Dev Journet 
+Dev Journey 
 https://x.com/Sankalpa_dev

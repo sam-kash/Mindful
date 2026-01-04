@@ -7,41 +7,71 @@ const itemSchema = new mongoose.Schema(
       ref: "User",
       required: true
     },
-    title: String,
-    content: String,
-    priorityScore: Number, 
+
+    title: {
+      type: String,
+      trim: true
+    },
+
+    content: {
+      type: String
+    },
+
+    priorityScore: {
+      type: Number,
+      default: 0
+    },
+
     category: {
       type: String,
       enum: ["email", "task", "notification"],
       default: "task"
     },
-    source : {
-      type : String,
-      enum : ["manual", "gmail", "outlook"],
+
+    source: {
+      type: String,
+      enum: ["manual", "gmail", "outlook"],
       default: "manual"
     },
+
+    // Used only for external systems (Gmail, Outlook, etc.)
     externalId: {
       type: String
     },
-    isArchived : {
+
+    // State flags
+    isArchived: {
       type: Boolean,
-      default : false
+      default: false
     },
+
     isDeleted: {
-      type : Boolean,
-      default : false
+      type: Boolean,
+      default: false
     },
-    isRead : {
-      type : Boolean,
-      default : false,
+
+    isRead: {
+      type: Boolean,
+      default: false
     },
-    readAt : {
-      type : Date
+
+    readAt: {
+      type: Date
     }
   },
-  { timestamps: true }
+  {
+    timestamps: true
+  }
 );
 
-itemSchema.index({user:1, source : 1, externalId : 1} , {unique: true})
+itemSchema.index(
+  { user: 1, source: 1, externalId: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      externalId: { $exists: true, $ne: null }
+    }
+  }
+);
 
 export default mongoose.model("Item", itemSchema);

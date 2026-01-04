@@ -1,6 +1,6 @@
 import express from "express"
 import { createItem, getItems } from "../controllers/itemController.js"
-import { protect } from "../middleware/authmiddleware.js";
+import { protect } from "../middleware/authMiddleware.js";
 import { explainItem } from "../controllers/explainController.js";
 import { archiveItem, restoreItem, deleteItem } from "../controllers/itemStateController.js";
 import { markRead, markUnread } from "../controllers/readStateController.js";

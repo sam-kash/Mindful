@@ -1,3 +1,4 @@
+import connectDB from "../config/db.js";
 import { Worker } from "bullmq";
 import redis from "../config/redis.js";
 import Item from "../models/Item.js";
@@ -7,11 +8,16 @@ import {
   adjustByMode
 } from "../services/priorityService.js";
 
+await connectDB();
+
 console.log("Ingest Worker started")
 
 new Worker(
   "ingest-queue",
   async (job) => {
+
+    console.log("Processing job" , job.id);
+
     const { userId, items } = job.data;
 
     const user = await User.findById(userId);
