@@ -9,6 +9,11 @@ const userSchema = new mongoose.Schema(
       type:String,
       enum :["busy", "focus" , "relaxed", "all"],
       default : "all"
+    },
+    google : {
+      accessToken: String,
+      refreshToken: String,
+      tokenExpiry: String
     }
   },
   { timestamps: true }

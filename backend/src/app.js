@@ -6,6 +6,7 @@ import itemRoutes from "./routes/itemRoutes.js";
 import ingestRoutes from "./routes/ingestRoutes.js"
 //import Activity from "./models/Activity.js";
 import activityRoutes from "./routes/activityRoutes.js";
+import oauthRoutes from "./routes/oauthRoutes.js";
 
 const app = express();
 
@@ -16,7 +17,9 @@ app.use("/api/users", userRoutes);
 app.use(errorHandler);
 app.use("/api/items", itemRoutes)
 app.use("/api/ingest" , ingestRoutes);
-app.use("/api/activity" , activityRoutes) 
+app.use("/api/activity" , activityRoutes);
+app.use("/api/oauth", oauthRoutes);
+
 
 // Adding a health route to test backend for development purpose
 
