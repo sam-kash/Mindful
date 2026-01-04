@@ -7,7 +7,7 @@ import {
   adjustByMode
 } from "../services/priorityService.js";
 
-console.log("Ingest worker started")
+console.log("Ingest Worker started")
 
 new Worker(
   "ingest-queue",
@@ -15,27 +15,46 @@ new Worker(
     const { userId, items } = job.data;
 
     const user = await User.findById(userId);
+    if (!user) return;
 
-    const docs = items.map((it) => {
+    const docs = [];
+
+    for (const it of items) {
+      if (it.externalId && it.source) {
+        const exists = await Item.findOne({
+          user: userId,
+          source: it.source,
+          externalId: it.externalId
+        });
+
+        if (exists) continue; // skip duplicates
+      }
+
       let score = calculatePriority({
         title: it.title,
         content: it.content
       });
 
       score = adjustByMode(score, user.mode);
+      score = Number.isFinite(score) ? Math.min(score, 100) : 0;
 
-      return {
+      docs.push({
         user: userId,
         title: it.title,
         content: it.content,
-        category: it.category,
-        source: it.source,
+        category: it.category || "email",
+        source: it.source || "gmail",
         externalId: it.externalId,
-        priorityScore: Math.min(score, 100)
-      };
-    });
+        priorityScore: score
+      });
+    }
 
-    await Item.insertMany(docs, { ordered: false });
+    if (docs.length > 0) {
+      await Item.insertMany(docs, { ordered: false });
+    }
   },
-  { connection: redis }
+  {
+    connection: redis,
+    concurrency: 5 
+  }
 );

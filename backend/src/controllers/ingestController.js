@@ -59,7 +59,14 @@ export const ingestBatch = asyncHandler(async (req, res) => {
   await ingestQueue.add("batch-ingest", {
     userId: req.user.id,
     items
-  });
+  },
+  {
+    //jobId : `ingest:${req.user.id}:${items.length}:${Date.now()}`,
+    attempts : 5,
+    backoff : {type: "exponential", delay:2000}
+  }
+
+);
 
   res.status(202).json({
     message: "Batch ingestion queued",
