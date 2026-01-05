@@ -13,7 +13,8 @@ const userSchema = new mongoose.Schema(
     google : {
       accessToken: String,
       refreshToken: String,
-      tokenExpiry: String
+      tokenExpiry: String,
+      historyId : String
     }
   },
   { timestamps: true }

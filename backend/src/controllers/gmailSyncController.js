@@ -4,7 +4,8 @@ import { ingestQueue } from "../queues/ingestQueue.js";
 import { refreshGoogleAccessToken } from "../services/googleTokenService.js";
 import {
   fetchGmailMessageIds,
-  fetchGmailMessage
+  fetchGmailMessage,
+  fetchGmailProfile
 } from "../services/gmailService.js";
 
 export const syncGmail = asyncHandler(async (req, res) => {
@@ -19,17 +20,30 @@ export const syncGmail = asyncHandler(async (req, res) => {
     user.google.refreshToken
   );
 
-  //Fetch message IDs
-  const messageIds = await fetchGmailMessageIds(accessToken);
+  // 1. Fetch profile → authoritative historyId
+  const { historyId } = await fetchGmailProfile(accessToken);
+
+  // Only save if valid
+if (historyId) {
+  user.google.historyId = historyId;
+  await user.save();
+}
+
+  // Save historyId
+  user.google.historyId = historyId;
+  await user.save();
+
+  // 2. Fetch message IDs (no historyId here)
+  const { messages } = await fetchGmailMessageIds(accessToken);
 
   // Normalize messages
   const items = [];
-  for (const msg of messageIds) {
+  for (const msg of messages) {
     const item = await fetchGmailMessage(accessToken, msg.id);
     items.push(item);
   }
 
-  //Queue ingestion
+  //  Queue ingestion
   await ingestQueue.add("gmail-sync", {
     userId: user._id,
     items

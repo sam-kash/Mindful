@@ -4,7 +4,8 @@ import { ingestQueue } from "../queues/ingestQueue.js";
 import { refreshGoogleAccessToken } from "../services/googleTokenService.js";
 import {
   fetchGmailMessageIds,
-  fetchGmailMessage
+  fetchGmailMessage,
+  fetchGmailHistory
 } from "../services/gmailService.js";
 
 export const startGmailSyncCron = () => {
@@ -22,12 +23,38 @@ export const startGmailSyncCron = () => {
           user.google.refreshToken
         );
 
-        const messageIds = await fetchGmailMessageIds(accessToken);
+        let items = [];
 
-        const items = [];
-        for (const msg of messageIds) {
-          const item = await fetchGmailMessage(accessToken, msg.id);
-          items.push(item);
+        // FIRST-TIME SYNC (no historyId yet)
+        if (!user.google.historyId) {
+          const { messages, historyId } =
+            await fetchGmailMessageIds(accessToken);
+
+          for (const msg of messages) {
+            const item = await fetchGmailMessage(accessToken, msg.id);
+            items.push(item);
+          }
+
+          user.google.historyId = historyId;
+          await user.save();
+        }
+        // INCREMENTAL SYNC
+        else {
+          const { history, historyId } =
+            await fetchGmailHistory(accessToken, user.google.historyId);
+
+          for (const h of history) {
+            for (const msg of h.messagesAdded || []) {
+              const item = await fetchGmailMessage(
+                accessToken,
+                msg.message.id
+              );
+              items.push(item);
+            }
+          }
+
+          user.google.historyId = historyId;
+          await user.save();
         }
 
         if (items.length > 0) {
