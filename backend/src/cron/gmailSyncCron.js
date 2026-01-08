@@ -24,8 +24,9 @@ export const startGmailSyncCron = () => {
         );
 
         let items = [];
+        let newHistoryId = null;
 
-        // FIRST-TIME SYNC (no historyId yet)
+        // FIRST-TIME SYNC
         if (!user.google.historyId) {
           const { messages, historyId } =
             await fetchGmailMessageIds(accessToken);
@@ -35,8 +36,7 @@ export const startGmailSyncCron = () => {
             items.push(item);
           }
 
-          user.google.historyId = historyId;
-          await user.save();
+          newHistoryId = historyId;
         }
         // INCREMENTAL SYNC
         else {
@@ -53,16 +53,24 @@ export const startGmailSyncCron = () => {
             }
           }
 
-          user.google.historyId = historyId;
-          await user.save();
+          newHistoryId = historyId;
         }
 
+        //Queue ingestion if there are new items
         if (items.length > 0) {
           await ingestQueue.add("gmail-sync", {
             userId: user._id,
             items
           });
         }
+
+        // Update sync metadata ONLY after successful detection
+        if (newHistoryId) {
+          user.google.historyId = newHistoryId;
+          user.google.lastSyncedAt = new Date();
+          await user.save();
+        }
+
       } catch (err) {
         console.error(
           `[CRON] Gmail sync failed for user ${user.email}`,

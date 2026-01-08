@@ -6,12 +6,10 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 const router = express.Router();
 
 
-router.get("/me", protect, (req, res) => {
-  res.json({
-    message: "Protected route working",
-    userId: req.user.id
-  });
-});
+router.get("/me", protect, asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user.id).select("-password");
+  res.json(user);
+}));
 
 router.put(
   "/mode",
@@ -29,5 +27,16 @@ router.put(
     });
   })
 );
+
+router.get("/integrations", protect, asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user.id);
+
+  res.json({
+    gmailConnected: Boolean(user.google?.refreshToken),
+    lastSyncedAt: user.google?.lastSyncedAt || null
+  });
+}));
+
+    
 
 export default router;

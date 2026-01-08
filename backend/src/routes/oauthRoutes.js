@@ -7,7 +7,7 @@ import {
 
 const router = express.Router();
 
-router.get("/google", googleAuthRedirect);
+router.get("/google",protect, googleAuthRedirect);
 router.get("/google/callback", googleAuthCallback);
 
 export default router;

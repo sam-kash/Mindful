@@ -8,6 +8,8 @@ import ingestRoutes from "./routes/ingestRoutes.js"
 import activityRoutes from "./routes/activityRoutes.js";
 import oauthRoutes from "./routes/oauthRoutes.js";
 import gmailRoutes from "./routes/gmailRoutes.js"
+import healthRoutes from "./routes/healthRoutes.js";
+import { authLimiter } from "./middleware/rateLimiter.js";
 
 const app = express();
 
@@ -21,7 +23,10 @@ app.use("/api/ingest" , ingestRoutes);
 app.use("/api/activity" , activityRoutes);
 app.use("/api/oauth", oauthRoutes);
 app.use("/api/gmail" , gmailRoutes);
+app.use("/api/health" , healthRoutes)
 
+app.use("/api/auth", authLimiter);
+app.use("/api/oauth", authLimiter);
 
 // Adding a health route to test backend for development purpose
 
