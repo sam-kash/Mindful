@@ -76,6 +76,9 @@ export const startGmailSyncCron = () => {
           `[CRON] Gmail sync failed for user ${user.email}`,
           err.message
         );
+        if (err.response) {
+          console.error("Error details:", JSON.stringify(err.response.data, null, 2));
+        }
       }
     }
   });

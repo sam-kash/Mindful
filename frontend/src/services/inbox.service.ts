@@ -10,13 +10,27 @@ export interface InboxItem {
   createdAt: string;
 }
 
-export const fetchInboxItems = async () => {
+export interface InboxResponse {
+  items: InboxItem[];
+  nextCursor?: string;
+}
+
+export const fetchInboxItems = async (
+  params?: {
+    limit?: number;
+    cursor?: string;
+    unreadOnly?: boolean;
+  }
+): Promise<InboxResponse> => {
   const res = await api.get("/items", {
     params: {
-      limit: 20,
+      limit: params?.limit ?? 20,
+      cursor: params?.cursor,
+      unreadOnly: params?.unreadOnly,
     },
   });
-  return res.data; // { items, pagination }
+
+  return res.data;
 };
 
 export const markAsRead = async (itemId: string) => {
@@ -26,3 +40,4 @@ export const markAsRead = async (itemId: string) => {
 export const archiveItem = async (itemId: string) => {
   await api.patch(`/items/${itemId}/archive`);
 };
+

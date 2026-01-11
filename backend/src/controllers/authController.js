@@ -49,12 +49,13 @@ export const login = asyncHandler(async (req, res) => {
 
   res.status(200).json({
     success: true,
-    message : "Login successful",
+    message: "Login successful",
     token,
-    user:{
+    user: {
       id: user._id,
-      name : user.name,
-      email : user.email
+      name: user.name,
+      email: user.email,
+      gmailConnected: !!user.google?.refreshToken
     }
   })
 });

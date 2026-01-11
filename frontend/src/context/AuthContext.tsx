@@ -8,6 +8,7 @@ interface User {
   id: string;
   email: string;
   name?: string;
+  gmailConnected?: boolean;
 }
 
 interface AuthContextType {
@@ -38,7 +39,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           return;
         }
 
-        const res = await api.get("/api/me");
+        const res = await api.get("/users/me");
         setUser(res.data);
       } catch {
         sessionStorage.removeItem("accessToken");
@@ -52,7 +53,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const login = async (email: string, password: string) => {
     const res = await loginUser(email, password);
-    sessionStorage.setItem("accessToken", res.accessToken);
+    sessionStorage.setItem("accessToken", res.token);
     setUser(res.user);
   };
 
