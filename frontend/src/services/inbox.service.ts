@@ -22,15 +22,29 @@ export const fetchInboxItems = async (
     unreadOnly?: boolean;
   }
 ): Promise<InboxResponse> => {
+  const page = params?.cursor ? parseInt(params.cursor) : 1;
+
   const res = await api.get("/items", {
     params: {
       limit: params?.limit ?? 20,
-      cursor: params?.cursor,
+      page,
       unreadOnly: params?.unreadOnly,
     },
   });
 
-  return res.data;
+  const { items, page: currentPage, pages } = res.data;
+  const nextCursor = currentPage < pages ? String(currentPage + 1) : undefined;
+
+  // Map _id to id if necessary
+  const mappedItems = items.map((item: any) => ({
+    ...item,
+    id: item._id || item.id,
+  }));
+
+  return {
+    items: mappedItems,
+    nextCursor,
+  };
 };
 
 export const markAsRead = async (itemId: string) => {
