@@ -9,18 +9,23 @@ export interface IntegrationStatus {
 
 export const fetchIntegrations = async (): Promise<IntegrationStatus[]> => {
   const res = await api.get("/users/integrations");
-  return res.data ? [
-    {
-      provider: "gmail",
-      connected: res.data.gmailConnected,
-      lastSyncedAt: res.data.lastSyncedAt
-    }
-  ] : [];
+
+  return res.data
+    ? [
+        {
+          provider: "gmail",
+          connected: res.data.gmailConnected,
+          lastSyncedAt: res.data.lastSyncedAt,
+        },
+      ]
+    : [];
 };
 
-export const connectGmail = async () => {
-  // Redirect to backend OAuth endpoint with token
+// ✅ Redirect happens HERE → returns void
+export const connectGmail = async (): Promise<void> => {
   const token = sessionStorage.getItem("accessToken");
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+  const API_URL =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+
   window.location.href = `${API_URL}/oauth/google?token=${token}`;
 };

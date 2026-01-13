@@ -6,10 +6,14 @@ import {
   connectGmail,
   IntegrationStatus,
 } from "@/services/integrations.service";
+import { useRouter } from "next/navigation";
 
 export default function IntegrationsPage() {
   const [integrations, setIntegrations] = useState<IntegrationStatus[]>([]);
   const [loading, setLoading] = useState(true);
+  const [connecting, setConnecting] = useState(false);
+
+  const router = useRouter();
 
   useEffect(() => {
     const load = async () => {
@@ -26,8 +30,21 @@ export default function IntegrationsPage() {
 
   const gmail = integrations.find((i) => i.provider === "gmail");
 
+  // ✅ Auto-redirect to inbox once connected
+  useEffect(() => {
+    if (gmail?.connected) {
+      router.push("/inbox");
+    }
+  }, [gmail, router]);
+
   const handleConnect = async () => {
-    await connectGmail();
+    try {
+      setConnecting(true);
+      await connectGmail(); // ⬅️ redirect happens here
+    } catch (err) {
+      console.error("Failed to start Gmail OAuth", err);
+      setConnecting(false);
+    }
   };
 
   if (loading) return <p>Loading integrations...</p>;
@@ -41,14 +58,19 @@ export default function IntegrationsPage() {
 
         {gmail?.connected ? (
           <div>
-            <p> Connected</p>
-            {gmail.email && <p>Email: {gmail.email}</p>}
+            <p>✅ Connected</p>
             {gmail.lastSyncedAt && (
-              <p>Last synced: {new Date(gmail.lastSyncedAt).toLocaleString()}</p>
+              <p>
+                Last synced:{" "}
+                {new Date(gmail.lastSyncedAt).toLocaleString()}
+              </p>
             )}
+            <p>Redirecting to inbox…</p>
           </div>
         ) : (
-          <button onClick={handleConnect}>Connect Gmail</button>
+          <button onClick={handleConnect} disabled={connecting}>
+            {connecting ? "Connecting…" : "Connect Gmail"}
+          </button>
         )}
       </section>
     </div>
