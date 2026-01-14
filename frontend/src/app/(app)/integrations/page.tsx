@@ -30,7 +30,7 @@ export default function IntegrationsPage() {
 
   const gmail = integrations.find((i) => i.provider === "gmail");
 
-  // ✅ Auto-redirect to inbox once connected
+  //  Auto-redirect to inbox once connected
   useEffect(() => {
     if (gmail?.connected) {
       router.push("/inbox");
@@ -58,7 +58,7 @@ export default function IntegrationsPage() {
 
         {gmail?.connected ? (
           <div>
-            <p>✅ Connected</p>
+            <p> Connected</p>
             {gmail.lastSyncedAt && (
               <p>
                 Last synced:{" "}
