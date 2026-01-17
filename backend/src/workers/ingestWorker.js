@@ -8,15 +8,30 @@ import {
   adjustByMode
 } from "../services/priorityService.js";
 
-await connectDB();
 
-console.log("Ingest Worker started")
+await connectDB();
+console.log("Ingest Worker started");
+
+
+//Deterministic mapping (MVP-locked)
+function mapScoreToUrgency(score) {
+  if (score >= 80) return "high";
+  if (score >= 50) return "medium";
+  return "low";
+}
+
+// Simple, explainable reason (will improve in Step 2)
+function getReasonFromUrgency(urgency) {
+  if (urgency === "high") return "Requires immediate attention";
+  if (urgency === "medium") return "Important but not urgent";
+  return "Can wait";
+}
+
 
 new Worker(
   "ingest-queue",
   async (job) => {
-
-    console.log("Processing job" , job.id);
+    console.log("Processing job", job.id);
 
     const { userId, items } = job.data;
 
@@ -26,6 +41,7 @@ new Worker(
     const docs = [];
 
     for (const it of items) {
+      //  Deduplication
       if (it.externalId && it.source) {
         const exists = await Item.findOne({
           user: userId,
@@ -33,8 +49,9 @@ new Worker(
           externalId: it.externalId
         });
 
-        if (exists) continue; // skip duplicates
+        if (exists) continue;
       }
+
 
       let score = calculatePriority({
         title: it.title,
@@ -44,6 +61,11 @@ new Worker(
       score = adjustByMode(score, user.mode);
       score = Number.isFinite(score) ? Math.min(score, 100) : 0;
 
+
+      const urgency = mapScoreToUrgency(score);
+      const reason = getReasonFromUrgency(urgency);
+
+
       docs.push({
         user: userId,
         title: it.title,
@@ -51,6 +73,12 @@ new Worker(
         category: it.category || "email",
         source: it.source || "gmail",
         externalId: it.externalId,
+
+        // 🔥 MVP CONTRACT
+        urgency,     // "high" | "medium" | "low"
+        reason,      // single, clear explanation
+
+        // internal (keep for now)
         priorityScore: score
       });
     }
@@ -61,6 +89,6 @@ new Worker(
   },
   {
     connection: redis,
-    concurrency: 5 
+    concurrency: 5
   }
 );
